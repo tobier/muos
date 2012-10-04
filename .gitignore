@@ -1,0 +1,8 @@
+# General Emacs and C stuff
+*~
+*.o
+
+# muos specific files that doesn't need to be saved
+muos.img
+kernel
+bootblock
