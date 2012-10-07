@@ -13,6 +13,4 @@ If the build host is not a 32-bit x86 machine, a cross-compiler will be needed.
 ## Running
 
 The disk image can be written to a flash drive and booted on a real x86 machine. However, using QEMU instead
-is very recommended, in case there are some serious bugs that may break something. MuOS can be run in QEMU as follows:
-
-   qemu muos.img
+is very recommended, in case there are some serious bugs that may break something.
