@@ -36,6 +36,11 @@ OBJECTS=
 include drivers/Makefile
 include kernel/Makefile
 
+# Beautify output
+# ---------------------------------------------------------------------------
+QUIET_CC = @echo    '   ' CC'      '$<;
+QUIET_AS = @echo    '   ' AS'      '$<;
+
 # Build targets
 # ---------------------------------------------------------------------------
 default: image
@@ -45,16 +50,20 @@ bootblock: boot/bootmain.c boot/bootasm.S util/sign.pl
 	@$(CC) $(CFLAGS) -fno-pic -nostdinc -c boot/bootasm.S
 	@$(LD) $(LDFLAGS) -N -e start -Ttext 0x7C00 -o bootblock.o bootasm.o bootmain.o
 	@$(OBJCOPY) -S -O binary -j .text bootblock.o bootblock
-	@rm -rf bootblock.o bootasm.o bootmain.o
-	@./util/sign.pl bootblock
+	@./util/sign.pl bootblock 2> /dev/null 
 
 mukernel: $(OBJECTS) util/kernel.ld
 	@$(LD) $(LDFLAGS) -T util/kernel.ld -o mukernel $(OBJECTS)
 
 image: bootblock mukernel
-	@dd if=/dev/zero of=muos.img count=10000	
-	@dd if=bootblock of=muos.img conv=notrunc	
-	@dd if=mukernel of=muos.img seek=1 conv=notrunc
+	@dd if=/dev/zero of=muos.img count=10000 2> /dev/null
+	@dd if=bootblock of=muos.img conv=notrunc 2> /dev/null	
+	@dd if=mukernel of=muos.img seek=1 conv=notrunc 2> /dev/null
 
 clean:
 	@rm -rf muos.img mukernel bootblock *~ include/*~ $(OBJECTS)
+
+.s.o:
+	$(QUIET_AS)$(AS) -c -o $*.o $<
+.c.o:
+	$(QUIET_CC)$(CC) $(CFLAGS) -c -o $*.o $<

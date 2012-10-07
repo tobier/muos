@@ -1,71 +1,137 @@
-/* 
-   tty/console.c
-   This part of the tty driver is responsible for 
-   writing to the screen. 
-*/
+#include <muos/tty.h>
 #include <types.h>
 #include <x86.h>
 
-/* Text mode supports 80x25 characters */
-#define COLS 80
-#define ROWS 25
+typedef struct {
+  int c_column;      /* current cursor column */
+  int c_row;         /* current cursor row */
+  int c_size;        /* the size of the console */
+  ushort c_attrib;   /* attribute used when printing characters */ 
+  ushort c_blank;    /* blank character */
+} console_t;
 
-/* 
-   Each text mode character takes up 2 bytes. 
-   The least significant byte is the ASCII character,
-   the most significant byte is the foreground and background colors.
-*/
-static ushort* videoram = (ushort*)0xB8000;
-
+#define NUM_COLS 80
+#define NUM_ROWS 25
 #define CRTPORT 0x3D4
+static ushort* crt = (ushort*)0xB8000;
+static console_t curr_con; /* right now there is just one console */
+static console_t* con = &curr_con;
 
-static void
-cons_putc(int c)
+static void con_clear();
+static void con_setcsr(int row, int col);
+static void con_memmove(ushort* src, ushort* dest, int count);
+static void con_memset(ushort val, ushort* dest, int count);
+
+/*======================================*
+ * con_clear
+ *
+ * Clear the console.
+ *======================================*/
+static void con_clear()
+{
+  con_memset(con->c_blank, crt, con->c_size);
+}
+
+/*======================================*
+ * con_setcsr
+ *
+ * Update the position of the cursor.
+ *
+ * @row The row to put the cursor on.
+ * @col The column to put the cursor on.
+ *======================================*/
+static void con_setcsr(int row, int col)
 {
   int position;
   
-  /* Read the current cursor position */
-  outb(CRTPORT, 0x0E);
-  position = inb(CRTPORT + 1) << 8;
-  outb(CRTPORT, 0x0F);
-  position |= inb(CRTPORT + 1);
-
-  /* Handle newline */
-  if(c == '\n')
-    position += 80 - position % 80;
-  else if(c == '\b' && position > 0)
-    position--;
-  else
-    videoram[position++] = (c & 0xFF) | 0x0700;
-
-  /* Reset the cursor */
+  /* Update the cursor. This assumes that the position is valid */
+  position = row * NUM_COLS + col;
   outb(CRTPORT, 0x0E);
   outb(CRTPORT + 1, position >> 8);
   outb(CRTPORT, 0x0F);
   outb(CRTPORT + 1, position);
-  videoram[position++] = ' ' | 0x0700;
+  crt[position++] = con->c_blank;
 }
 
-void
-cons_init(void)
+/*======================================*
+ * con_memmove
+ *
+ * Move a section of video memory to
+ * another memory location.
+ *
+ * @src The source video memory.
+ * @dest The destination video memory.
+ *======================================*/
+static void con_memmove(ushort* src, ushort* dest, int count)
 {
-  /* Clear the console by printing a space
-     that has a black background color in
-     each position */
-  int pos;
-  for(pos = 0; pos < ROWS*COLS; pos++)
-    videoram[pos] = ' ' | 0x0700;
+  int i;
+  for(i = 0; i < count; i++) {
+    *dest++ = *src++;
+  }
+}
 
-  /* Reset the cursor */
-  outb(CRTPORT, 0x0E);
-  outb(CRTPORT + 1, 0);
-  outb(CRTPORT, 0x0F);
-  outb(CRTPORT + 1, 0);
+/*======================================*
+ * con_memset
+ *
+ * Set a section of video memory to the
+ * given character value.
+ *======================================*/
+static void con_memset(ushort val, ushort* dest, int count)
+{
+  int i;
+  for(i = 0; i < count; i++) {
+    *dest++ = val;
+  }
+}
 
-  cons_putc('H');
-  cons_putc('e');
-  cons_putc('l');
-  cons_putc('l');
-  cons_putc('o');
-  cons_putc('!');
+/*======================================*
+ * con_init
+ *
+ * Initialize the console.
+ *======================================*/
+void con_init()
+{
+  /* Initialize the console */
+  con->c_column = 0;
+  con->c_row = 0;
+  con->c_size = NUM_ROWS * NUM_COLS;
+  con->c_attrib = 0x0700;      /* that's white on black */
+  con->c_blank = ' ' | 0x0700; /* blank with black background */
+
+  con_clear();
+  con_setcsr(0, 0);
+}
+
+/*======================================*
+ * con_putc
+ *
+ * Print a character to the console.
+ *======================================*/
+void con_putc(char c)
+{
+  switch(c) {
+  case '\n':
+    con->c_column = 0;
+    con->c_row++;
+    break;
+  case '\b':
+    if(con->c_column > 0) con->c_column--;
+    break;
+  default:
+    crt[con->c_row * NUM_COLS + con->c_column++] = (c & 0xFF) | con->c_attrib;
+    if(con->c_column >= NUM_COLS) {
+      con->c_column = 0;
+      con->c_row++;
+    }
+    break;
+  }
+
+  /* Scroll if neccessary */
+  if(con->c_row >= NUM_ROWS) {
+    con_memmove(crt + NUM_COLS, crt, (NUM_ROWS - 1) * NUM_COLS);
+    con_memset(con->c_blank, crt + (NUM_ROWS - 1) * NUM_COLS, NUM_COLS);
+    con->c_row = NUM_ROWS - 1;
+  }
+
+  con_setcsr(con->c_row, con->c_column);
 }
