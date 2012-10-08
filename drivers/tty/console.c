@@ -61,6 +61,7 @@ static void con_setcsr(int row, int col)
  *
  * @src The source video memory.
  * @dest The destination video memory.
+ * @count How many characters to move.
  *======================================*/
 static void con_memmove(ushort* src, ushort* dest, int count)
 {
@@ -75,6 +76,11 @@ static void con_memmove(ushort* src, ushort* dest, int count)
  *
  * Set a section of video memory to the
  * given character value.
+ *
+ * @val The character, with attribute, to
+ *      use as the value.
+ * @dest The destination memory.
+ * @count How many characters to set.
  *======================================*/
 static void con_memset(ushort val, ushort* dest, int count)
 {
@@ -106,6 +112,9 @@ void con_init()
  * con_putc
  *
  * Print a character to the console.
+ *
+ * @c The character to print to the 
+ *    console.
  *======================================*/
 void con_putc(char c)
 {

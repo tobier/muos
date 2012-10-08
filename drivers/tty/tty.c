@@ -17,8 +17,13 @@ void tty_init(void)
  * tty_write
  *
  * Write to the tty device from the given
- * buffer. Returns how many bytes that
- * were written.
+ * buffer. 
+ *
+ * @buf Character buffer to write from.
+ * @count How many characters to write.
+ *
+ * @returns How many characters that were
+ *          actually written.
  *======================================*/
 int tty_write(char *buf, uint count)
 {
