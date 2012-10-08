@@ -61,7 +61,7 @@ image: bootblock mukernel
 	@dd if=mukernel of=muos.img seek=1 conv=notrunc 2> /dev/null
 
 clean:
-	@rm -rf muos.img mukernel bootblock *~ include/*~ $(OBJECTS)
+	@rm -rf muos.img mukernel bootblock *~ include/*~ $(OBJECTS) *.o
 
 .s.o:
 	$(QUIET_AS)$(AS) -c -o $*.o $<
