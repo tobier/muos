@@ -1,9 +1,15 @@
 #ifndef _TYPES_H_
 #define _TYPES_H_
 
-typedef unsigned int   uint;
-typedef unsigned short ushort;
-typedef unsigned char  uchar;
-typedef uint pde_t;
+/* Common integer types */
 
-#endif
+#define int8_t char
+#define uint8_t unsigned char
+
+#define int16_t short
+#define uint16_t unsigned short
+
+#define int32_t int
+#define uint32_t unsigned int
+
+#endif/*_TYPES_H_*/

@@ -46,8 +46,8 @@ QUIET_AS = @echo    '   ' AS'      '$<;
 default: image
 
 bootblock: boot/bootmain.c boot/bootasm.S util/sign.pl
-	@$(CC) $(CFLAGS) -fno-pic -O -nostdinc -c boot/bootmain.c
-	@$(CC) $(CFLAGS) -fno-pic -nostdinc -c boot/bootasm.S
+	@$(CC) -I./boot $(CFLAGS) -fno-pic -O -nostdinc -c boot/bootmain.c
+	@$(CC) -I./boot $(CFLAGS) -fno-pic -nostdinc -c boot/bootasm.S
 	@$(LD) $(LDFLAGS) -N -e start -Ttext 0x7C00 -o bootblock.o bootasm.o bootmain.o
 	@$(OBJCOPY) -S -O binary -j .text bootblock.o bootblock
 	@./util/sign.pl bootblock 2> /dev/null 

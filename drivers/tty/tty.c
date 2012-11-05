@@ -25,7 +25,7 @@ void tty_init(void)
  * @returns How many characters that were
  *          actually written.
  *======================================*/
-int tty_write(char *buf, uint count)
+int tty_write(char *buf, uint32_t count)
 {
   // the tty device should have some sort of
   // write queue, but right now we just print

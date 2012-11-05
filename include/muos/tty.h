@@ -4,6 +4,6 @@
 #include <types.h>
 
 void tty_init(void);
-int tty_write(char *buf, uint count);
+int tty_write(char *buf, uint32_t count);
 
 #endif

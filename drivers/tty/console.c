@@ -1,26 +1,26 @@
 #include <muos/tty.h>
+#include <asm.h>
 #include <types.h>
-#include <x86.h>
 
 typedef struct {
-  int c_column;      /* current cursor column */
-  int c_row;         /* current cursor row */
-  int c_size;        /* the size of the console */
-  ushort c_attrib;   /* attribute used when printing characters */ 
-  ushort c_blank;    /* blank character */
+  uint8_t c_column;      /* current cursor column */
+  uint8_t c_row;         /* current cursor row */
+  uint16_t c_size;       /* the size of the console */
+  uint16_t c_attrib;     /* attribute used when printing characters */ 
+  uint16_t c_blank;      /* blank character */
 } console_t;
 
 #define NUM_COLS 80
 #define NUM_ROWS 25
 #define CRTPORT 0x3D4
-static ushort* crt = (ushort*)0xB8000;
+static uint16_t* crt = (uint16_t*)0xB8000;
 static console_t curr_con; /* right now there is just one console */
 static console_t* con = &curr_con;
 
 static void con_clear();
-static void con_setcsr(int row, int col);
-static void con_memmove(ushort* src, ushort* dest, int count);
-static void con_memset(ushort val, ushort* dest, int count);
+static void con_setcsr(uint8_t row, uint8_t col);
+static void con_memmove(uint16_t* src, uint16_t* dest, uint32_t count);
+static void con_memset(uint16_t val, uint16_t* dest, uint32_t count);
 
 /*======================================*
  * con_clear
@@ -40,7 +40,7 @@ static void con_clear()
  * @row The row to put the cursor on.
  * @col The column to put the cursor on.
  *======================================*/
-static void con_setcsr(int row, int col)
+static void con_setcsr(uint8_t row, uint8_t col)
 {
   int position;
   
@@ -63,9 +63,9 @@ static void con_setcsr(int row, int col)
  * @dest The destination video memory.
  * @count How many characters to move.
  *======================================*/
-static void con_memmove(ushort* src, ushort* dest, int count)
+static void con_memmove(uint16_t* src, uint16_t* dest, uint32_t count)
 {
-  int i;
+  uint32_t i;
   for(i = 0; i < count; i++) {
     *dest++ = *src++;
   }
@@ -82,9 +82,9 @@ static void con_memmove(ushort* src, ushort* dest, int count)
  * @dest The destination memory.
  * @count How many characters to set.
  *======================================*/
-static void con_memset(ushort val, ushort* dest, int count)
+static void con_memset(uint16_t val, uint16_t* dest, uint32_t count)
 {
-  int i;
+  uint32_t i;
   for(i = 0; i < count; i++) {
     *dest++ = val;
   }
