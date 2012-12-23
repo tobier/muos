@@ -20,14 +20,14 @@ CROSS_COMPILE 	= i386-unknown-elf-
 
 # Make variables
 CC		= $(CROSS_COMPILE)gcc
-AS		= $(CROSS_COMPILE)gas
+AS		= $(CROSS_COMPILE)nasm
 LD		= $(CROSS_COMPILE)ld
 OBJCOPY		= $(CROSS_COMPILE)objcopy
 
 CFLAGS		= -fno-pic -static -nostdlib -fno-builtin \
                   -nostartfiles -nodefaultlibs -fno-strict-aliasing \
                   -Wall -Wextra -Werror -fno-omit-frame-pointer -I$(src_tree)/include
-ASFLAGS 	= -m32 -gdwarf-2 -Wa,-divide
+ASFLAGS 	= -t elf32
 
 # Object files that to be linked into mukernel. It'll be populated
 # by the includes below.
@@ -35,6 +35,7 @@ OBJECTS=
 
 include drivers/Makefile
 include kernel/Makefile
+include lib/Makefile
 
 # Beautify output
 # ---------------------------------------------------------------------------
@@ -60,10 +61,13 @@ image: bootblock mukernel
 	@dd if=bootblock of=muos.img conv=notrunc 2> /dev/null	
 	@dd if=mukernel of=muos.img seek=1 conv=notrunc 2> /dev/null
 
+qemu: image
+	@qemu muos.img
+
 clean:
 	@rm -rf muos.img mukernel bootblock *~ include/*~ $(OBJECTS) *.o
 
 .s.o:
-	$(QUIET_AS)$(AS) -c -o $*.o $<
+	$(QUIET_AS)$(AS) -o $*.o $<
 .c.o:
 	$(QUIET_CC)$(CC) $(CFLAGS) -c -o $*.o $<
