@@ -8,6 +8,7 @@
  */
 #include <muos/common.h>
 #include <muos/tty.h>
+#include "descriptor_tables.h"
 
 static void announce()
 {
@@ -18,7 +19,7 @@ static void announce()
 void kmain(void)
 {
   // Setup GDT, interrupts, etc.
-  // ...
+  init_descriptor_tables();
 
   // Initialize drivers
   tty_init();
@@ -30,6 +31,9 @@ void kmain(void)
   printk("testing an int: %d\n", 2439);
   printk("testing both: %s, %d\n", "foobar", 941232);
   printk("testing a hexadecimal int: %p\n", 0xA12F);
+
+  asm volatile ("int $0x2");
+  asm volatile ("int $0x3");
 
   PANIC("kernel has nothing to do");
 }

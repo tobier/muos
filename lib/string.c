@@ -16,6 +16,18 @@ void *memccpy(void *s1, const void *s2, int c, size_t n)
   return 0;
 }
 
+void *memset(void * s, int c, size_t n)
+{
+  size_t i;
+  uint8_t ch = (uint8_t)c;
+  uint8_t* d = s;
+
+  for(i = 0; i < n; ++i)
+    *d++ = ch;
+
+  return s;
+}
+
 size_t strlen(const char *s)
 {
   const char * tmp;

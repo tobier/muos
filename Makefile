@@ -20,14 +20,14 @@ CROSS_COMPILE 	= i386-unknown-elf-
 
 # Make variables
 CC		= $(CROSS_COMPILE)gcc
-AS		= $(CROSS_COMPILE)nasm
+AS		= nasm
 LD		= $(CROSS_COMPILE)ld
 OBJCOPY		= $(CROSS_COMPILE)objcopy
 
 CFLAGS		= -fno-pic -static -nostdlib -fno-builtin \
                   -nostartfiles -nodefaultlibs -fno-strict-aliasing \
                   -Wall -Wextra -Werror -fno-omit-frame-pointer -I$(src_tree)/include
-ASFLAGS 	= -t elf32
+ASFLAGS 	= -f elf32
 
 # Object files that to be linked into mukernel. It'll be populated
 # by the includes below.
@@ -45,6 +45,12 @@ QUIET_AS = @echo    '   ' AS'      '$<;
 # Build targets
 # ---------------------------------------------------------------------------
 default: image
+
+%.o: %.s
+	$(QUIET_AS)$(AS) $(ASFLAGS) -o $*.o $<
+
+%.o: %.c
+	$(QUIET_CC)$(CC) $(CFLAGS) -c -o $*.o $<	
 
 bootblock: boot/bootmain.c boot/bootasm.S util/sign.pl
 	@$(CC) -I./boot $(CFLAGS) -fno-pic -O -nostdinc -c boot/bootmain.c
@@ -67,7 +73,3 @@ qemu: image
 clean:
 	@rm -rf muos.img mukernel bootblock *~ include/*~ $(OBJECTS) *.o
 
-.s.o:
-	$(QUIET_AS)$(AS) -o $*.o $<
-.c.o:
-	$(QUIET_CC)$(CC) $(CFLAGS) -c -o $*.o $<
