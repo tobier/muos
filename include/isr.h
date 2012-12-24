@@ -1,6 +1,8 @@
 #ifndef _ISR_H_
 #define _ISR_H_
 
+#include <types.h>
+
 typedef struct registers
 {
   uint32_t ds;                                     /* Data segment selector */

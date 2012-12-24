@@ -1,5 +1,6 @@
 #include <muos/tty.h>
 
+void kbd_init();
 void con_init();
 void con_putc(char c);
 
@@ -11,6 +12,7 @@ void con_putc(char c);
 void tty_init(void)
 {
   con_init();
+  kbd_init();
 }
 
 /*======================================*

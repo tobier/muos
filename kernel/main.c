@@ -39,13 +39,11 @@ void kmain(void)
   tty_init();
 
   // Initilize PIT at 100 Hz
-  init_timer(100);
+  //init_timer(100);
   
   // Now it should be safe to accept interrupts
   enable_interrupts();
 
   // We're up and running!
   announce();
-
-
 }
