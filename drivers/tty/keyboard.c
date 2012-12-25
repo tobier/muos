@@ -34,6 +34,7 @@ uint8_t kbdus[128] =
     0,
     0,	/* Right Arrow */
   '+',
+
     0,	/* 79 - End key*/
     0,	/* Down Arrow */
     0,	/* Page Down */
@@ -53,7 +54,9 @@ static void kbd_handler(__attribute__((unused))registers_t regs)
   if(scancode & 0x80) {
     // do nothing right now
   } else {
-    con_putc(kbdus[scancode]);
+    // Echo character on the screen
+    uint8_t c = kbdus[scancode]; 
+    con_putc(c);
   }
 }
 
